@@ -30,6 +30,11 @@ namespace HealthCenter
             Dispatcher.InvokeAsync(async () =>
             {
                 NpgsqlConnection conn = new(GetConnectionStringBuilder().ToString());
+
+                NoticeWindow noticeWindow = new();
+                conn.Notice += (sender, ev) => noticeWindow.AddNotice(sender, ev.Notice);
+                noticeWindow.Show();
+
                 await conn.OpenAsync();
 
                 LoginWindow window = new(conn);
