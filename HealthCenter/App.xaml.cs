@@ -15,6 +15,7 @@ namespace HealthCenter
         public string? DatabaseArg;
         public string? UsernameArg;
         public string? PasswordArg;
+        public string? SchemaArg;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -60,6 +61,10 @@ namespace HealthCenter
 
                     case "Password":
                         PasswordArg = value;
+                        break;
+
+                    case "Schema":
+                        SchemaArg = value;
                         break;
                 }
             }

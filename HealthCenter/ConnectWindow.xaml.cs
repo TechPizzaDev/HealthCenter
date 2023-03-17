@@ -16,6 +16,7 @@ namespace HealthCenter
             HostTextbox.Text = app.HostArg;
             PortTextbox.Text = app.PortArg;
             DatabaseTextbox.Text = app.DatabaseArg;
+            SchemaTextbox.Text = app.SchemaArg;
             UsernameTextbox.Text = app.UsernameArg;
             PasswordTextbox.Password = app.PasswordArg;
         }
@@ -51,7 +52,8 @@ namespace HealthCenter
             {
                 Host = HostTextbox.Text,
                 Port = int.Parse(PortTextbox.Text),
-                Database = DatabaseTextbox.Text,
+                Database = DatabaseTextbox.Text, 
+                SearchPath = SchemaTextbox.Text,
 
                 Username = UsernameTextbox.Text,
                 Password = PasswordTextbox.Password,
