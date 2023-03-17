@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "HealthCenter": {
+      "commandName": "Project"
+    },
+    "HealthCenter with Login": {
+      "commandName": "Project",
+      "commandLineArgs": "--ArgFile \"secrets.txt\""
+    }
+  }
+}

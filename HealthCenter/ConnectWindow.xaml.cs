@@ -12,12 +12,12 @@ namespace HealthCenter
         {
             InitializeComponent();
 
-            HostTextbox.Text = "pgserver.mau.se";
-            PortTextbox.Text = 5432.ToString();
-            DatabaseTextbox.Text = "an7044_db";
-
-            UsernameTextbox.Text = "an7044";
-            PasswordTextbox.Password = "nrhhseoc";
+            App app = (App)Application.Current;
+            HostTextbox.Text = app.HostArg;
+            PortTextbox.Text = app.PortArg;
+            DatabaseTextbox.Text = app.DatabaseArg;
+            UsernameTextbox.Text = app.UsernameArg;
+            PasswordTextbox.Password = app.PasswordArg;
         }
 
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
