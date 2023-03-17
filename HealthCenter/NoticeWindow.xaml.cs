@@ -17,7 +17,7 @@ namespace HealthCenter
         {
             Dispatcher.Invoke(() =>
             {
-                LogBox.Items.Add(new NoticeItem(notice.Severity, notice.MessageText, notice.Where));
+                NoticeGrid.Items.Add(new NoticeItem(notice.Severity, notice.MessageText, notice.Where));
             });
         }
 
