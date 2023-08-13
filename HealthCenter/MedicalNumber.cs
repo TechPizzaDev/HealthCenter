@@ -8,5 +8,9 @@
         {
             this.value = value;
         }
+
+        public MedicalNumber(string value) : this(int.Parse(value.Replace(" ", "")))
+        {
+        }
     }
 }

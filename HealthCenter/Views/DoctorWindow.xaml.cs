@@ -5,17 +5,17 @@ using Npgsql;
 namespace HealthCenter.Views
 {
     /// <summary>
-    /// Interaction logic for PatientWindow.xaml
+    /// Interaction logic for DoctorWindow.xaml
     /// </summary>
-    public partial class PatientWindow : Window
+    public partial class DoctorWindow : Window
     {
         public NpgsqlConnection Connection { get; }
-        public int PatientId { get; }
+        public int EmployeeId { get; }
 
-        public PatientWindow(NpgsqlConnection connection, int patientId)
+        public DoctorWindow(NpgsqlConnection connection, int employeeId)
         {
             Connection = connection ?? throw new ArgumentNullException(nameof(connection));
-            PatientId = patientId;
+            EmployeeId = employeeId;
 
             InitializeComponent();
         }

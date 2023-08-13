@@ -7,13 +7,13 @@ using NpgsqlTypes;
 namespace HealthCenter
 {
     /// <summary>
-    /// Interaction logic for RegisterWindow .xaml
+    /// Interaction logic for RegisterPatientWindow.xaml
     /// </summary>
-    public partial class RegisterWindow : Window
+    public partial class RegisterPatientWindow : Window
     {
         public NpgsqlConnection Connection { get; }
 
-        public RegisterWindow(NpgsqlConnection connection)
+        public RegisterPatientWindow(NpgsqlConnection connection)
         {
             Connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
@@ -56,11 +56,11 @@ namespace HealthCenter
                 try
                 {
                     MedicalNumber medNum = new(int.Parse(MedicalNumTextbox.Text.Replace(" ", "")));
-                    byte[] password = DbCalls.MakePassword(PasswordTextbox.Password);
+                    byte[] password = DbHelper.MakePassword(PasswordTextbox.Password);
 
                     using NpgsqlCommand cmd = new();
                     cmd.Connection = Connection;
-                    cmd.CommandText = @"call health_center.register_patient(@med_num, @first_name, @last_name, @gender, @address, @phone, @birth_date, @password)";
+                    cmd.CommandText = @"call register_patient(@med_num, @first_name, @last_name, @gender, @address, @phone, @birth_date, @password)";
                     cmd.Parameters.Add(new NpgsqlParameter("med_num", medNum));
                     cmd.Parameters.Add(new NpgsqlParameter("first_name", FirstNameTextbox.Text.Trim()) { NpgsqlDbType = NpgsqlDbType.Varchar });
                     cmd.Parameters.Add(new NpgsqlParameter("last_name", LastNameTextbox.Text.Trim()) { NpgsqlDbType = NpgsqlDbType.Varchar });
@@ -71,7 +71,7 @@ namespace HealthCenter
                     cmd.Parameters.Add(new NpgsqlParameter("password", password));
                     _ = await cmd.ExecuteNonQueryAsync();
 
-                    int userId = await DbCalls.Auth(Connection, medNum, password);
+                    int userId = await DbCalls.AuthPatient(Connection, medNum, password);
                     PatientWindow window = new(Connection, userId);
                     Application.Current.MainWindow = window;
                     window.Show();

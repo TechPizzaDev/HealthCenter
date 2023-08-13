@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="HealthCenter - Admin" Height="500" Width="800">
     <Grid>
-        <Button Content="Query Tool" Width="80" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5" Click="QueryToolButton_Click"/>
+        <!--Button Content="Query Tool" Width="80" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5" Click="QueryToolButton_Click" /-->
+        <Button Content="Register Doctor" Width="100" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,10,0,0" Click="RegisterDoctorButton_Click"/>
     </Grid>
 </Window>

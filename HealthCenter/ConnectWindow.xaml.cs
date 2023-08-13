@@ -40,7 +40,9 @@ namespace HealthCenter
                 {
                     NpgsqlDataSourceBuilder dataSourceBuilder = new(GetConnectionStringBuilder().ToString());
                     dataSourceBuilder.MapComposite<MedicalNumber>("health_center.medical_num");
-                    await using var dataSource = dataSourceBuilder.Build();
+                    dataSourceBuilder.MapComposite<EmployeeNumber>("health_center.employee_num");
+
+                    await using NpgsqlDataSource dataSource = dataSourceBuilder.Build();
 
                     NpgsqlConnection conn = await dataSource.OpenConnectionAsync();
 

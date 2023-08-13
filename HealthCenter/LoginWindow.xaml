@@ -27,8 +27,8 @@
                 </Style>
             </Grid.Resources>
             
-            <Label Grid.Row="0" Content="Medical Number"/>
-            <TextBox Grid.Row="0" x:Name="MedicalNumTextbox" />
+            <Label Grid.Row="0" Content="User Number"/>
+            <TextBox Grid.Row="0" x:Name="UserNumTextbox" />
 
             <Label Grid.Row="1" Content="Password"/>
             <PasswordBox Grid.Row="1" x:Name="PasswordTextbox" 
@@ -38,8 +38,11 @@
         </Grid>
 
 
-        <Button x:Name="ConnectButton" Content="Login" Click="LoginButton_Click" 
+        <Button x:Name="LoginPatientButton" Content="Login as Patient" Click="LoginPatientButton_Click" 
                 HorizontalAlignment="Center" VerticalAlignment="Top" Margin="30,150,30,30" Padding="20,5,20,5" />
+
+        <Button x:Name="LoginEmployeeButton" Content="Login as Employee" Click="LoginEmployeeButton_Click" 
+                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="30,200,30,30" Padding="20,5,20,5" />
 
         <Button x:Name="RegisterButton" Content="Register" Click="RegisterButton_Click" 
                 HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="50" Padding="20,5,20,5" />
