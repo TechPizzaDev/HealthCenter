@@ -1,0 +1,12 @@
+﻿<Window x:Class="HealthCenter.Views.AdminWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HealthCenter.Views"
+        mc:Ignorable="d"
+        Title="HealthCenter - Admin" Height="500" Width="800">
+    <Grid>
+        <Button Content="Query Tool" Width="80" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5" Click="QueryToolButton_Click"/>
+    </Grid>
+</Window>

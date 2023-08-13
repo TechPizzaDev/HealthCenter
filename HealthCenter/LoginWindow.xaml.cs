@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using HealthCenter.Views;
 using Npgsql;
 
 namespace HealthCenter
@@ -16,28 +15,45 @@ namespace HealthCenter
 
         public LoginWindow(NpgsqlConnection connection)
         {
-            Connection = connection;
+            Connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
             InitializeComponent();
+        }
+
+        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            var element = sender as UIElement;
+            if (element != null)
+            {
+                element.IsEnabled = false;
+            }
 
             Dispatcher.InvokeAsync(async () =>
             {
-                using NpgsqlCommand cmd = new();
-                cmd.Connection = Connection;
-
-                //cmd.CommandText = $"INSERT INTO table_name (column1, column2, column3,..) VALUES ( value1, value2, value3,..);";
-
-                for (int i = 0; i < 10; i++)
+                try
                 {
-                    cmd.CommandText = @"call health_center.register_user('patient', 'Bert', 'Il', '\x1234567890'::bytea, '\x1234567890'::bytea, 'pro@google.com')";
-                    await cmd.ExecuteNonQueryAsync();
+                    MedicalNumber medNum = new(int.Parse(MedicalNumTextbox.Text.Replace(" ", "")));
+                    byte[] password = DbCalls.MakePassword(PasswordTextbox.Password);
 
-                    await Task.Delay(500);
+                    int userId = await DbCalls.Auth(Connection, medNum, password);
+                    PatientWindow window = new(Connection, userId);
+                    Application.Current.MainWindow = window;
+                    window.Show();
+
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    ex.ToMessageBox();
+                    if (element != null)
+                    {
+                        element.IsEnabled = true;
+                    }
                 }
             });
         }
 
-        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is UIElement element)
             {
@@ -46,7 +62,11 @@ namespace HealthCenter
 
             Dispatcher.InvokeAsync(async () =>
             {
+                RegisterWindow window = new(Connection);
+                Application.Current.MainWindow = window;
+                window.Show();
 
+                Close();
             });
         }
     }
