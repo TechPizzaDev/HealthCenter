@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="HealthCenter - Patient" Height="500" Width="800">
     <Grid>
-        
+        <Button Content="Create Appointment" Width="150" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Click="CreateAppointmentButton_Click"/>
+
     </Grid>
 </Window>

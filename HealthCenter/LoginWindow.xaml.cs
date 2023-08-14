@@ -18,13 +18,14 @@ namespace HealthCenter
 
             InitializeComponent();
 
+
+#if DEBUG
             Dispatcher.InvokeAsync(async () =>
             {
                 try
                 {
                     using NpgsqlCommand cmd = new();
                     cmd.Connection = connection;
-
                     cmd.CommandText = "INSERT INTO health_center.employees (employee_num, password) " +
                     "VALUES (@employee_num, @password) " +
                     "ON CONFLICT (employee_num) DO NOTHING;";
@@ -37,6 +38,7 @@ namespace HealthCenter
                     ex.ToMessageBox();
                 }
             });
+#endif
         }
 
         private void LoginPatientButton_Click(object sender, RoutedEventArgs e)

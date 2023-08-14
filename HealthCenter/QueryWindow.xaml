@@ -15,6 +15,9 @@
             <Label x:Name="InputQueryLabel" Grid.Row="0" Content="Input query:" Width="80" HorizontalAlignment="Left" VerticalAlignment="Center"/>
             <TextBox x:Name="InputQueryText" Grid.Row="0" Margin="80,0,0,0" VerticalAlignment="Center" KeyDown="InputQueryText_KeyDown"/>
 
+            <Button x:Name="ConfirmButton" Grid.Row="0" Content="Confirm" Width="80" Click="ConfirmButton_Click" 
+                    HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,5,0,0" Visibility="Visible" IsEnabled="False"/>
+            
             <Label Grid.Row="1" Content="Status:" Width="50" HorizontalAlignment="Left" VerticalAlignment="Center"/>
             <TextBlock x:Name="StatusText" Grid.Row="1" Text="" Margin="50,0,0,0" VerticalAlignment="Center"/>
         </Grid>

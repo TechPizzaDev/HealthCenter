@@ -1,40 +1,40 @@
 ﻿using System;
+using System.Collections;
 using NodaTime;
 
-namespace HealthCenter.Views
+namespace HealthCenter
 {
+    public delegate bool ScheduleHourChanged(ScheduleHour instance, bool newValue);
+
     public class ScheduleHour
     {
         private bool _changed;
         private OffsetTime _Hour;
-        private bool _Monday;
-        private bool _Tuesday;
-        private bool _Wednesday;
-        private bool _Thursday;
-        private bool _Friday;
+        private BitArray _Days;
 
         public LocalTime Hour => _Hour.TimeOfDay;
-        public bool Monday { get => _Monday; set => Change(ref _Monday, value); }
-        public bool Tuesday { get => _Tuesday; set => Change(ref _Tuesday, value); }
-        public bool Wednesday { get => _Wednesday; set => Change(ref _Wednesday, value); }
-        public bool Thursday { get => _Thursday; set => Change(ref _Thursday, value); }
-        public bool Friday { get => _Friday; set => Change(ref _Friday, value); }
+        public bool Monday { get => _Days[0]; set => ChangeDay(0, value); }
+        public bool Tuesday { get => _Days[1]; set => ChangeDay(1, value); }
+        public bool Wednesday { get => _Days[2]; set => ChangeDay(2, value); }
+        public bool Thursday { get => _Days[3]; set => ChangeDay(3, value); }
+        public bool Friday { get => _Days[4]; set => ChangeDay(4, value); }
 
-        public event Action<ScheduleHour>? Changed;
+        public ScheduleHourChanged? Changed;
 
-        public ScheduleHour(OffsetTime hour, bool monday, bool tuesday, bool wednesday, bool thursday, bool friday)
+        public ScheduleHour(OffsetTime hour, BitArray days)
         {
             _Hour = hour;
-            _Monday = monday;
-            _Tuesday = tuesday;
-            _Wednesday = wednesday;
-            _Thursday = thursday;
-            _Friday = friday;
+            _Days = days;
         }
 
         public OffsetTime GetOffsetHour()
         {
             return _Hour;
+        }
+
+        public BitArray GetDays()
+        {
+            return _Days;
         }
 
         public bool Save()
@@ -44,13 +44,15 @@ namespace HealthCenter.Views
             return changed;
         }
 
-        private void Change(ref bool field, bool value)
+        private void ChangeDay(int index, bool value)
         {
-            if (field != value)
+            if (_Days[index] != value)
             {
-                field = value;
-                _changed = true;
-                Changed?.Invoke(this);
+                if (Changed == null || Changed.Invoke(this, value))
+                {
+                    _Days[index] = value;
+                    _changed = true;
+                }
             }
         }
     }

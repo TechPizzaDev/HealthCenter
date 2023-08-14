@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using System.Windows.Documents;
+using NodaTime;
 using Npgsql;
 
 namespace HealthCenter
@@ -42,15 +46,17 @@ namespace HealthCenter
             throw new InvalidCredentialException("The given Employee credentials are not valid.");
         }
 
-        public static async Task<int> RegisterDoctor(NpgsqlConnection connection, EmployeeNumber employeeNumber, string fullName, string phone, byte[] password)
+        public static async Task<int> RegisterDoctor(
+            NpgsqlConnection connection, EmployeeNumber employeeNumber, string fullName, string phone, byte[] password, string specialization)
         {
             using NpgsqlCommand cmd = new();
             cmd.Connection = connection;
-            cmd.CommandText = "SELECT health_center.register_doctor(@employee_num, @full_name, @phone, @password)";
+            cmd.CommandText = "SELECT health_center.register_doctor(@employee_num, @full_name, @phone, @password, @spec)";
             cmd.Parameters.Add(new NpgsqlParameter("employee_num", employeeNumber));
             cmd.Parameters.Add(new NpgsqlParameter("full_name", fullName));
             cmd.Parameters.Add(new NpgsqlParameter("phone", phone));
             cmd.Parameters.Add(new NpgsqlParameter("password", password));
+            cmd.Parameters.Add(new NpgsqlParameter("spec", specialization));
             try
             {
                 object? result = await cmd.ExecuteScalarAsync();
@@ -80,6 +86,58 @@ namespace HealthCenter
             cmd.Parameters.Add(new NpgsqlParameter("id", employeeId));
             object? result = await cmd.ExecuteScalarAsync();
             return Convert.ToBoolean(result);
+        }
+
+        public static async Task<List<ScheduleHour>> GetDoctorSchedule(NpgsqlConnection connection, int employeeId, ScheduleHourChanged? changed)
+        {
+            using NpgsqlCommand cmd = new();
+            cmd.Connection = connection;
+            cmd.CommandText =
+                "SELECT * FROM doc_schedule " +
+                "WHERE (doc_id = @doc_id)";
+
+            cmd.Parameters.Add(new NpgsqlParameter("doc_id", employeeId));
+
+            List<(OffsetTime hour, BitArray days)> tuples = new();
+            await using (NpgsqlDataReader reader = await cmd.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync(default))
+                {
+                    var hour = reader.GetFieldValue<OffsetTime>(1);
+                    var days = reader.GetFieldValue<BitArray>(2);
+                    tuples.Add((hour, days));
+                }
+            }
+
+            List<ScheduleHour> hours = new();
+            foreach (var (hour, scheduleDays) in tuples)
+            {
+                BitArray appointmentMask = await GetAppointmentDayMask(connection, employeeId, hour);
+                ScheduleHour item = new(hour, scheduleDays.Xor(appointmentMask));
+                item.Changed = changed;
+                hours.Add(item);
+            }
+            return hours;
+        }
+
+        public static async Task<BitArray> GetAppointmentDayMask(NpgsqlConnection connection, int employeeId, OffsetTime hour)
+        {
+            BitArray mask = new(5); using NpgsqlCommand cmd = new();
+            cmd.Connection = connection;
+            cmd.CommandText =
+                "SELECT day FROM appointments " +
+                "WHERE (doc_id = @doc_id AND hour = @hour)";
+
+            cmd.Parameters.Add(new NpgsqlParameter("doc_id", employeeId));
+            cmd.Parameters.Add(new NpgsqlParameter("hour", hour));
+
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync(default))
+            {
+                var day = reader.GetFieldValue<BitArray>(0);
+                mask.Or(day);
+            }
+            return mask;
         }
     }
 }

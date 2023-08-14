@@ -23,6 +23,7 @@ namespace HealthCenter
             FullNameTextbox.TextChanged += (s, e) => UpdateButton();
             PhoneNumberTextbox.TextChanged += (s, e) => UpdateButton();
             PasswordTextbox.PasswordChanged += (s, e) => UpdateButton();
+            SpecializationTextbox.TextChanged += (s, e) => UpdateButton();
             UpdateButton();
         }
 
@@ -33,6 +34,7 @@ namespace HealthCenter
             enabled = enabled && PasswordTextbox.Password.Length > 3;
             enabled = enabled && FullNameTextbox.Text.Trim().Length > 0;
             enabled = enabled && PhoneNumberTextbox.Text.Replace(" ", "").Length > 0;
+            enabled = enabled && SpecializationTextbox.Text.Replace(" ", "").Length > 0;
             RegisterButton.IsEnabled = enabled;
         }
 
@@ -50,9 +52,10 @@ namespace HealthCenter
                     EmployeeNumber employeeNum = new(int.Parse(EmployeeNumTextbox.Text.Replace(" ", "")));
                     string fullName = FullNameTextbox.Text.Trim();
                     string phone = PhoneNumberTextbox.Text.Trim();
+                    string specialization = SpecializationTextbox.Text.Trim();
                     byte[] password = DbHelper.MakePassword(PasswordTextbox.Password);
 
-                    int employeeId = await DbCalls.RegisterDoctor(Connection, employeeNum, fullName, phone, password);
+                    int employeeId = await DbCalls.RegisterDoctor(Connection, employeeNum, fullName, phone, password, specialization);
 
                     Close();
                 }

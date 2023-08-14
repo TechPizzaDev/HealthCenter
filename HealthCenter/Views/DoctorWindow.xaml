@@ -12,6 +12,7 @@
                   CanUserReorderColumns="False" CanUserSortColumns="False"
                   SelectionUnit="Cell"
                   HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" />
-        <Button x:Name="ScheduleSaveButton" Content="Save Schedule" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,215,10,0" Click="ScheduleSaveButton_Click"/>
+        <Button x:Name="ScheduleSaveButton" Content="Save Schedule" Width="100" 
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,215,10,0" Click="ScheduleSaveButton_Click"/>
     </Grid>
 </Window>

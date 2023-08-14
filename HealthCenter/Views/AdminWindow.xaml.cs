@@ -22,7 +22,8 @@ namespace HealthCenter.Views
 
         private void QueryToolButton_Click(object sender, RoutedEventArgs e)
         {
-            QueryWindow window = new(Connection, "SELECT * FROM patients");
+            QueryWindow window = new(Connection);
+            window.TakeControl("SELECT * FROM patients");
             window.Show();
         }
 
@@ -34,7 +35,8 @@ namespace HealthCenter.Views
 
         private void DoctorListButton_Click(object sender, RoutedEventArgs e)
         {
-            QueryWindow window = new(Connection, "SELECT * FROM doctors");
+            QueryWindow window = new(Connection);
+            window.TakeControl(DbHelper.DoctorQuery("d.*, s.name specialization"));
             window.Show();
         }
 
@@ -46,13 +48,15 @@ namespace HealthCenter.Views
 
         private void SpecializationListButton_Click(object sender, RoutedEventArgs e)
         {
-            QueryWindow window = new(Connection, "SELECT * FROM specializations");
+            QueryWindow window = new(Connection);
+            window.TakeControl("SELECT * FROM specializations");
             window.Show();
         }
 
         private void PatientListButton_Click(object sender, RoutedEventArgs e)
         {
-            QueryWindow window = new(Connection, "SELECT * FROM patients");
+            QueryWindow window = new(Connection);
+            window.TakeControl("SELECT * FROM patients");
             window.Show();
         }
     }
