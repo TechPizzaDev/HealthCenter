@@ -29,7 +29,7 @@ namespace HealthCenter
         private void UpdateButton()
         {
             bool enabled = true;
-            enabled = enabled && EmployeeNumTextbox.Text.Replace(" ", "").Length == 9;
+            enabled = enabled && EmployeeNumTextbox.Text.Replace(" ", "").Length > 0;
             enabled = enabled && PasswordTextbox.Password.Length > 3;
             enabled = enabled && FullNameTextbox.Text.Trim().Length > 0;
             enabled = enabled && PhoneNumberTextbox.Text.Replace(" ", "").Length > 0;

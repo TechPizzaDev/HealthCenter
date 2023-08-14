@@ -8,6 +8,13 @@
         Title="HealthCenter - Admin" Height="500" Width="800">
     <Grid>
         <!--Button Content="Query Tool" Width="80" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5" Click="QueryToolButton_Click" /-->
-        <Button Content="Register Doctor" Width="100" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,10,0,0" Click="RegisterDoctorButton_Click"/>
+        <Button Content="Register Doctor" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,10,0,0" Click="RegisterDoctorButton_Click"/>
+        <Button Content="Doctor List" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="200,10,0,0" Click="DoctorListButton_Click"/>
+
+        <Button Content="Register Specialization" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,50,0,0" Click="RegisterSpecializationButton_Click"/>
+        <Button Content="Specialization List" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="200,50,0,0" Click="SpecializationListButton_Click"/>
+
+        <Button Content="Patient List" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="200,90,0,0" Click="PatientListButton_Click"/>
+
     </Grid>
 </Window>

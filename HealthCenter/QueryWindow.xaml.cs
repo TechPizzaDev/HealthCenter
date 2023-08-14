@@ -15,13 +15,20 @@ namespace HealthCenter
     {
         public NpgsqlConnection Connection { get; }
 
-        public QueryWindow(NpgsqlConnection connection)
+        public QueryWindow(NpgsqlConnection connection, string? query)
         {
             Connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
             InitializeComponent();
 
-            InputQueryText.Text = "SELECT * FROM users";
+            if (query != null)
+            {
+                Dispatch(query);
+
+                InputQueryText.Text = query;
+                InputQueryText.Visibility = Visibility.Collapsed;
+                InputQueryLabel.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void InputQueryText_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -31,13 +38,16 @@ namespace HealthCenter
                 return;
             }
 
+            Dispatch(InputQueryText.Text);
+        }
+
+        private void Dispatch(string query)
+        {
             Dispatcher.InvokeAsync(async () =>
             {
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 try
                 {
-                    string query = InputQueryText.Text;
-
                     StatusText.Text = $"Running query: {query}";
                     InputQueryText.IsEnabled = false;
 

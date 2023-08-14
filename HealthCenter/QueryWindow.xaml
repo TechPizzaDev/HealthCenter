@@ -12,11 +12,11 @@
                 <RowDefinition Height="30" />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Content="Input query:" Width="80" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <Label x:Name="InputQueryLabel" Grid.Row="0" Content="Input query:" Width="80" HorizontalAlignment="Left" VerticalAlignment="Center"/>
             <TextBox x:Name="InputQueryText" Grid.Row="0" Margin="80,0,0,0" VerticalAlignment="Center" KeyDown="InputQueryText_KeyDown"/>
 
             <Label Grid.Row="1" Content="Status:" Width="50" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            <TextBlock x:Name="StatusText" Grid.Row="1" Text="Pain" Margin="50,0,0,0" VerticalAlignment="Center"/>
+            <TextBlock x:Name="StatusText" Grid.Row="1" Text="" Margin="50,0,0,0" VerticalAlignment="Center"/>
         </Grid>
 
         <DataGrid x:Name="UserGrid" 

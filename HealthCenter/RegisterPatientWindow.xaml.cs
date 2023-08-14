@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using HealthCenter.Views;
+using NodaTime;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -57,6 +58,7 @@ namespace HealthCenter
                 {
                     MedicalNumber medNum = new(int.Parse(MedicalNumTextbox.Text.Replace(" ", "")));
                     byte[] password = DbHelper.MakePassword(PasswordTextbox.Password);
+                    DateTime birthDate = BirthDatePicker.SelectedDate!.Value;
 
                     using NpgsqlCommand cmd = new();
                     cmd.Connection = Connection;
@@ -67,7 +69,7 @@ namespace HealthCenter
                     cmd.Parameters.Add(new NpgsqlParameter("gender", GenderTextbox.Text.Trim()) { NpgsqlDbType = NpgsqlDbType.Varchar });
                     cmd.Parameters.Add(new NpgsqlParameter("address", AddressTextbox.Text.Trim()) { NpgsqlDbType = NpgsqlDbType.Varchar });
                     cmd.Parameters.Add(new NpgsqlParameter("phone", PhoneNumberTextbox.Text.Replace(" ", "")) { NpgsqlDbType = NpgsqlDbType.Varchar });
-                    cmd.Parameters.Add(new NpgsqlParameter("birth_date", BirthDatePicker.SelectedDate!.Value) { NpgsqlDbType = NpgsqlDbType.Date });
+                    cmd.Parameters.Add(new NpgsqlParameter("birth_date", LocalDate.FromDateTime(birthDate)));
                     cmd.Parameters.Add(new NpgsqlParameter("password", password));
                     _ = await cmd.ExecuteNonQueryAsync();
 

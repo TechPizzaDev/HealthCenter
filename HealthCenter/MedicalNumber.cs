@@ -12,5 +12,10 @@
         public MedicalNumber(string value) : this(int.Parse(value.Replace(" ", "")))
         {
         }
+
+        public override string ToString()
+        {
+            return value.ToString().PadRight(9, '0');
+        }
     }
 }

@@ -20,15 +20,39 @@ namespace HealthCenter.Views
             InitializeComponent();
         }
 
+        private void QueryToolButton_Click(object sender, RoutedEventArgs e)
+        {
+            QueryWindow window = new(Connection, "SELECT * FROM patients");
+            window.Show();
+        }
+
         private void RegisterDoctorButton_Click(object sender, RoutedEventArgs e)
         {
             RegisterDoctorWindow window = new(Connection);
             window.Show();
         }
 
-        private void QueryToolButton_Click(object sender, RoutedEventArgs e)
+        private void DoctorListButton_Click(object sender, RoutedEventArgs e)
         {
-            QueryWindow window = new(Connection);
+            QueryWindow window = new(Connection, "SELECT * FROM doctors");
+            window.Show();
+        }
+
+        private void RegisterSpecializationButton_Click(object sender, RoutedEventArgs e)
+        {
+            RegisterSpecializationWindow window = new(Connection);
+            window.Show();
+        }
+
+        private void SpecializationListButton_Click(object sender, RoutedEventArgs e)
+        {
+            QueryWindow window = new(Connection, "SELECT * FROM specializations");
+            window.Show();
+        }
+
+        private void PatientListButton_Click(object sender, RoutedEventArgs e)
+        {
+            QueryWindow window = new(Connection, "SELECT * FROM patients");
             window.Show();
         }
     }

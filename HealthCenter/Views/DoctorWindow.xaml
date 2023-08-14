@@ -7,6 +7,11 @@
         mc:Ignorable="d"
         Title="HealthCenter - Doctor" Height="500" Width="800">
     <Grid>
-        
+        <DataGrid x:Name="ScheduleGrid" Width="400" Height="200" AutoGenerateColumns="True" 
+                  CanUserResizeColumns="False" CanUserResizeRows="False"
+                  CanUserReorderColumns="False" CanUserSortColumns="False"
+                  SelectionUnit="Cell"
+                  HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" />
+        <Button x:Name="ScheduleSaveButton" Content="Save Schedule" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,215,10,0" Click="ScheduleSaveButton_Click"/>
     </Grid>
 </Window>

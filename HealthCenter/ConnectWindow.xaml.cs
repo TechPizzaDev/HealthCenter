@@ -41,10 +41,12 @@ namespace HealthCenter
                     NpgsqlDataSourceBuilder dataSourceBuilder = new(GetConnectionStringBuilder().ToString());
                     dataSourceBuilder.MapComposite<MedicalNumber>("health_center.medical_num");
                     dataSourceBuilder.MapComposite<EmployeeNumber>("health_center.employee_num");
+                    dataSourceBuilder.UseNodaTime();
 
                     await using NpgsqlDataSource dataSource = dataSourceBuilder.Build();
 
                     NpgsqlConnection conn = await dataSource.OpenConnectionAsync();
+
 
 #if DEBUG
                     NoticeWindow noticeWindow = new();
