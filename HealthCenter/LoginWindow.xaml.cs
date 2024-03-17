@@ -56,8 +56,8 @@ namespace HealthCenter
                     MedicalNumber patientNum = new(UserNumTextbox.Text);
                     byte[] password = DbHelper.MakePassword(PasswordTextbox.Password);
 
-                    int userId = await DbCalls.AuthPatient(Connection, patientNum, password);
-                    PatientWindow window = new(Connection, userId);
+                    int patientId = await DbCalls.AuthPatient(Connection, patientNum, password);
+                    PatientWindow window = new(Connection, patientId);
                     Application.Current.MainWindow = window;
                     window.Show();
 

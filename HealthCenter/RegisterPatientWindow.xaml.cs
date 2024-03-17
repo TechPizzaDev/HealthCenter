@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Authentication;
 using System.Windows;
 using HealthCenter.Views;
 using NodaTime;
@@ -62,7 +63,7 @@ namespace HealthCenter
 
                     using NpgsqlCommand cmd = new();
                     cmd.Connection = Connection;
-                    cmd.CommandText = @"call register_patient(@med_num, @first_name, @last_name, @gender, @address, @phone, @birth_date, @password)";
+                    cmd.CommandText = @"select register_patient(@med_num, @first_name, @last_name, @gender, @address, @phone, @birth_date, @password)";
                     cmd.Parameters.Add(new NpgsqlParameter("med_num", medNum));
                     cmd.Parameters.Add(new NpgsqlParameter("first_name", FirstNameTextbox.Text.Trim()) { NpgsqlDbType = NpgsqlDbType.Varchar });
                     cmd.Parameters.Add(new NpgsqlParameter("last_name", LastNameTextbox.Text.Trim()) { NpgsqlDbType = NpgsqlDbType.Varchar });
@@ -71,9 +72,13 @@ namespace HealthCenter
                     cmd.Parameters.Add(new NpgsqlParameter("phone", PhoneNumberTextbox.Text.Replace(" ", "")) { NpgsqlDbType = NpgsqlDbType.Varchar });
                     cmd.Parameters.Add(new NpgsqlParameter("birth_date", LocalDate.FromDateTime(birthDate)));
                     cmd.Parameters.Add(new NpgsqlParameter("password", password));
-                    _ = await cmd.ExecuteNonQueryAsync();
 
-                    int userId = await DbCalls.AuthPatient(Connection, medNum, password);
+                    object? result = await cmd.ExecuteScalarAsync();
+                    if (!DbCalls.TryConvertMedicalNum(result, out int userId))
+                    {
+                        throw new InvalidCredentialException("The given Patient credentials are not valid.");
+                    }
+
                     PatientWindow window = new(Connection, userId);
                     Application.Current.MainWindow = window;
                     window.Show();

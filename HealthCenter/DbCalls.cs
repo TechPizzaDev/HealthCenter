@@ -2,9 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Security.Authentication;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 using NodaTime;
 using Npgsql;
 
@@ -12,7 +13,11 @@ namespace HealthCenter
 {
     public static class DbCalls
     {
-        public static async Task<int> AuthPatient(NpgsqlConnection connection, MedicalNumber medNumber, byte[] password)
+        /// <returns>The patient ID convertible to <see cref="MedicalNumber"/>.</returns>
+        /// <exception cref="InvalidCredentialException"></exception>
+        public static async Task<int> AuthPatient(
+            NpgsqlConnection connection, MedicalNumber medNumber, byte[] password,
+            CancellationToken cancellationToken = default)
         {
             using NpgsqlCommand cmd = new();
             cmd.Connection = connection;
@@ -20,16 +25,28 @@ namespace HealthCenter
             cmd.Parameters.Add(new NpgsqlParameter("med_num", medNumber));
             cmd.Parameters.Add(new NpgsqlParameter("password", password));
 
-            object? result = await cmd.ExecuteScalarAsync();
-            if (result != DBNull.Value && result is IConvertible convertible)
+            object? result = await cmd.ExecuteScalarAsync(cancellationToken);
+            if (TryConvertMedicalNum(result, out int patientId))
             {
-                return convertible.ToInt32(null);
+                return patientId;
             }
-
             throw new InvalidCredentialException("The given Patient credentials are not valid.");
         }
 
-        public static async Task<int> AuthEmployee(NpgsqlConnection connection, EmployeeNumber employeeNumber, byte[] password)
+        public static bool TryConvertMedicalNum(object? result, out int value)
+        {
+            if (result != DBNull.Value && result is IConvertible convertible)
+            {
+                value = convertible.ToInt32(null);
+                return true;
+            }
+            value = default;
+            return false;
+        }
+
+        public static async Task<int> AuthEmployee(
+            NpgsqlConnection connection, EmployeeNumber employeeNumber, byte[] password,
+            CancellationToken cancellationToken = default)
         {
             using NpgsqlCommand cmd = new();
             cmd.Connection = connection;
@@ -37,7 +54,7 @@ namespace HealthCenter
             cmd.Parameters.Add(new NpgsqlParameter("employee_num", employeeNumber));
             cmd.Parameters.Add(new NpgsqlParameter("password", password));
 
-            object? result = await cmd.ExecuteScalarAsync();
+            object? result = await cmd.ExecuteScalarAsync(cancellationToken);
             if (result != DBNull.Value && result is IConvertible convertible)
             {
                 return convertible.ToInt32(null);
@@ -47,7 +64,8 @@ namespace HealthCenter
         }
 
         public static async Task<int> RegisterDoctor(
-            NpgsqlConnection connection, EmployeeNumber employeeNumber, string fullName, string phone, byte[] password, string specialization)
+            NpgsqlConnection connection, EmployeeNumber employeeNumber, string fullName, string phone, byte[] password, string specialization,
+            CancellationToken cancellationToken = default)
         {
             using NpgsqlCommand cmd = new();
             cmd.Connection = connection;
@@ -59,7 +77,7 @@ namespace HealthCenter
             cmd.Parameters.Add(new NpgsqlParameter("spec", specialization));
             try
             {
-                object? result = await cmd.ExecuteScalarAsync();
+                object? result = await cmd.ExecuteScalarAsync(cancellationToken);
                 return Convert.ToInt32(result);
             }
             catch (DbException ex)
@@ -68,23 +86,27 @@ namespace HealthCenter
             }
         }
 
-        public static async Task<bool> IsAdmin(NpgsqlConnection connection, int employeeId)
+        public static async Task<bool> IsAdmin(
+            NpgsqlConnection connection, int employeeId,
+            CancellationToken cancellationToken = default)
         {
             using NpgsqlCommand cmd = new();
             cmd.Connection = connection;
             cmd.CommandText = "SELECT health_center.is_admin(@id)";
             cmd.Parameters.Add(new NpgsqlParameter("id", employeeId));
-            object? result = await cmd.ExecuteScalarAsync();
+            object? result = await cmd.ExecuteScalarAsync(cancellationToken);
             return Convert.ToBoolean(result);
         }
 
-        public static async Task<bool> IsDoctor(NpgsqlConnection connection, int employeeId)
+        public static async Task<bool> IsDoctor(
+            NpgsqlConnection connection, int employeeId,
+            CancellationToken cancellationToken = default)
         {
             using NpgsqlCommand cmd = new();
             cmd.Connection = connection;
             cmd.CommandText = "SELECT health_center.is_doctor(@id)";
             cmd.Parameters.Add(new NpgsqlParameter("id", employeeId));
-            object? result = await cmd.ExecuteScalarAsync();
+            object? result = await cmd.ExecuteScalarAsync(cancellationToken);
             return Convert.ToBoolean(result);
         }
 
@@ -137,14 +159,14 @@ namespace HealthCenter
             NpgsqlBatch batch = new(connection);
 
             foreach (OffsetTime hour in hours)
-        {
+            {
                 NpgsqlBatchCommand cmd = new();
-            cmd.CommandText =
-                "SELECT day FROM appointments " +
-                "WHERE (doc_id = @doc_id AND hour = @hour)";
+                cmd.CommandText =
+                    "SELECT day FROM appointments " +
+                    "WHERE (doc_id = @doc_id AND hour = @hour)";
 
-            cmd.Parameters.Add(new NpgsqlParameter("doc_id", employeeId));
-            cmd.Parameters.Add(new NpgsqlParameter("hour", hour));
+                cmd.Parameters.Add(new NpgsqlParameter("doc_id", employeeId));
+                cmd.Parameters.Add(new NpgsqlParameter("hour", hour));
 
                 batch.BatchCommands.Add(cmd);
             }
@@ -155,12 +177,12 @@ namespace HealthCenter
             for (int i = 0; i < masks.Length; i++)
             {
                 while (await reader.ReadAsync(cancellationToken))
-            {
-                var day = reader.GetFieldValue<BitArray>(0);
+                {
+                    var day = reader.GetFieldValue<BitArray>(0);
 
                     BitArray mask = masks[i] ?? (masks[i] = new BitArray(5));
-                mask.Or(day);
-            }
+                    mask.Or(day);
+                }
                 
                 if (!await reader.NextResultAsync(cancellationToken))
                 {
