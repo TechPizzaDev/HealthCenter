@@ -88,42 +88,57 @@ namespace HealthCenter
             return Convert.ToBoolean(result);
         }
 
-        public static async Task<List<ScheduleHour>> GetDoctorSchedule(NpgsqlConnection connection, int employeeId, ScheduleHourChanged? changed)
+        public static async Task<List<ScheduleHour>> GetDoctorSchedule(
+            NpgsqlConnection connection, int employeeId, ScheduleHourChanged? changed,
+            CancellationToken cancellationToken = default)
         {
             using NpgsqlCommand cmd = new();
             cmd.Connection = connection;
             cmd.CommandText =
-                "SELECT * FROM doc_schedule " +
+                "SELECT hour, days FROM doc_schedule " +
                 "WHERE (doc_id = @doc_id)";
 
             cmd.Parameters.Add(new NpgsqlParameter("doc_id", employeeId));
 
             List<(OffsetTime hour, BitArray days)> tuples = new();
-            await using (NpgsqlDataReader reader = await cmd.ExecuteReaderAsync())
+            await using (NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(cancellationToken))
             {
-                while (await reader.ReadAsync(default))
+                while (await reader.ReadAsync(cancellationToken))
                 {
-                    var hour = reader.GetFieldValue<OffsetTime>(1);
-                    var days = reader.GetFieldValue<BitArray>(2);
+                    var hour = reader.GetFieldValue<OffsetTime>(0);
+                    var days = reader.GetFieldValue<BitArray>(1);
                     tuples.Add((hour, days));
                 }
             }
 
+            BitArray?[] appointmentMasks = await GetAppointmentDayMasks(
+                connection, employeeId, tuples.Select(x => x.hour), cancellationToken);
+
             List<ScheduleHour> hours = new();
             foreach (var (hour, scheduleDays) in tuples)
             {
-                BitArray appointmentMask = await GetAppointmentDayMask(connection, employeeId, hour);
-                ScheduleHour item = new(hour, scheduleDays.Xor(appointmentMask));
+                BitArray? mask = appointmentMasks[hours.Count];
+                if (mask != null)
+                {
+                    scheduleDays.Xor(mask);
+                }
+
+                ScheduleHour item = new(hour, scheduleDays);
                 item.Changed = changed;
                 hours.Add(item);
             }
             return hours;
         }
 
-        public static async Task<BitArray> GetAppointmentDayMask(NpgsqlConnection connection, int employeeId, OffsetTime hour)
+        public static async Task<BitArray?[]> GetAppointmentDayMasks(
+            NpgsqlConnection connection, int employeeId, IEnumerable<OffsetTime> hours,
+            CancellationToken cancellationToken = default)
         {
-            BitArray mask = new(5); using NpgsqlCommand cmd = new();
-            cmd.Connection = connection;
+            NpgsqlBatch batch = new(connection);
+
+            foreach (OffsetTime hour in hours)
+        {
+                NpgsqlBatchCommand cmd = new();
             cmd.CommandText =
                 "SELECT day FROM appointments " +
                 "WHERE (doc_id = @doc_id AND hour = @hour)";
@@ -131,13 +146,29 @@ namespace HealthCenter
             cmd.Parameters.Add(new NpgsqlParameter("doc_id", employeeId));
             cmd.Parameters.Add(new NpgsqlParameter("hour", hour));
 
-            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync(default))
+                batch.BatchCommands.Add(cmd);
+            }
+
+            await using NpgsqlDataReader reader = await batch.ExecuteReaderAsync(cancellationToken);
+
+            BitArray?[] masks = new BitArray?[batch.BatchCommands.Count];
+            for (int i = 0; i < masks.Length; i++)
+            {
+                while (await reader.ReadAsync(cancellationToken))
             {
                 var day = reader.GetFieldValue<BitArray>(0);
+
+                    BitArray mask = masks[i] ?? (masks[i] = new BitArray(5));
                 mask.Or(day);
             }
-            return mask;
+                
+                if (!await reader.NextResultAsync(cancellationToken))
+                {
+                    break;
+                }
+            }
+
+            return masks;
         }
     }
 }
