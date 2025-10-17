@@ -30,7 +30,7 @@ namespace HealthCenter
                     "VALUES (@employee_num, @password) " +
                     "ON CONFLICT (employee_num) DO NOTHING;";
                     cmd.Parameters.Add(new NpgsqlParameter("employee_num", new EmployeeNumber("1")));
-                    cmd.Parameters.Add(new NpgsqlParameter("password", DbHelper.MakePassword("admin")));
+                    cmd.Parameters.Add(new NpgsqlParameter("password", DbCalls.MakePassword("admin")));
                     await cmd.ExecuteNonQueryAsync();
                 }
                 catch (Exception ex)
@@ -54,7 +54,7 @@ namespace HealthCenter
                 try
                 {
                     MedicalNumber patientNum = new(UserNumTextbox.Text);
-                    byte[] password = DbHelper.MakePassword(PasswordTextbox.Password);
+                    byte[] password = DbCalls.MakePassword(PasswordTextbox.Password);
 
                     int patientId = await DbCalls.AuthPatient(Connection, patientNum, password);
                     PatientWindow window = new(Connection, patientId);
@@ -87,7 +87,7 @@ namespace HealthCenter
                 try
                 {
                     EmployeeNumber employeeNum = new(UserNumTextbox.Text);
-                    byte[] password = DbHelper.MakePassword(PasswordTextbox.Password);
+                    byte[] password = DbCalls.MakePassword(PasswordTextbox.Password);
 
                     int employeeId = await DbCalls.AuthEmployee(Connection, employeeNum, password);
 

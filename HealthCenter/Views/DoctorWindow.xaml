@@ -14,5 +14,12 @@
                   HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" />
         <Button x:Name="ScheduleSaveButton" Content="Save Schedule" Width="100" 
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,215,10,0" Click="ScheduleSaveButton_Click"/>
+
+        <Button Content="Appointment List" Width="150" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10" Click="AppointmentListButton_Click"/>
+
+        <Button Content="Create Medical Record" Width="150" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,50" Click="CreateMedRecordButton_Click"/>
+        <Button Content="Medical Record List" Width="150" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="200,50" Click="MedRecordListButton_Click"/>
+
+        <Button Content="Notification List" Width="150" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="200,90" Click="NotificationListButton_Click"/>
     </Grid>
 </Window>

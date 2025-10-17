@@ -53,7 +53,7 @@ namespace HealthCenter
                     string fullName = FullNameTextbox.Text.Trim();
                     string phone = PhoneNumberTextbox.Text.Trim();
                     string specialization = SpecializationTextbox.Text.Trim();
-                    byte[] password = DbHelper.MakePassword(PasswordTextbox.Password);
+                    byte[] password = DbCalls.MakePassword(PasswordTextbox.Password);
 
                     int employeeId = await DbCalls.RegisterDoctor(Connection, employeeNum, fullName, phone, password, specialization);
 

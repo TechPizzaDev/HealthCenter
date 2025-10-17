@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Data;
 using System.Diagnostics;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Threading;
+using HealthCenter.Views;
 using Npgsql;
 
 namespace HealthCenter
@@ -26,17 +29,26 @@ namespace HealthCenter
             InitializeComponent();
 
             UserGrid.IsReadOnly = true;
+            ConfirmButton.Visibility = Visibility.Hidden;
+
+            UserGrid.SelectionChanged += UserGrid_SelectionChanged;
+            UserGrid.SelectedCellsChanged += UserGrid_SelectedCellsChanged;
+            UserGrid.AutoGeneratingColumn += UserGrid_AutoGeneratingColumn;
         }
 
         public QueryWindow TakeControl(string query)
         {
-            if (query == null)
-            {
-                throw new ArgumentNullException(nameof(query));
-            }
+            NpgsqlCommand cmd = new(query, Connection);
+            return TakeControl(cmd);
+        }
 
-            Dispatch(query);
-            InputQueryText.Text = query;
+        public QueryWindow TakeControl(NpgsqlCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+
+            Dispatch(command);
+            InputQueryText.Text = command.CommandText;
+
             TakeControl();
             return this;
         }
@@ -45,9 +57,6 @@ namespace HealthCenter
         {
             InputQueryText.Visibility = Visibility.Collapsed;
             InputQueryLabel.Visibility = Visibility.Collapsed;
-
-            UserGrid.SelectionChanged += UserGrid_SelectionChanged;
-            UserGrid.SelectedCellsChanged += UserGrid_SelectedCellsChanged;
             return this;
         }
 
@@ -77,6 +86,18 @@ namespace HealthCenter
             ConfirmButton.IsEnabled = SelectedCell.HasValue;
         }
 
+        private void UserGrid_AutoGeneratingColumn(object? sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+            if (e.Column is DataGridTextColumn column)
+            {
+                column.Binding = new Binding()
+                {
+                    Path = ((Binding) column.Binding).Path,
+                    Converter = new ScheduleConverter(),
+                };
+            }
+        }
+
         private void InputQueryText_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key != System.Windows.Input.Key.Enter)
@@ -89,15 +110,21 @@ namespace HealthCenter
 
         private void Dispatch(string query)
         {
+            NpgsqlCommand cmd = new(query, Connection);
+            Dispatch(cmd);
+        }
+
+        private void Dispatch(NpgsqlCommand command)
+        {
             Dispatcher.InvokeAsync(async () =>
             {
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 try
                 {
-                    StatusText.Text = $"Running query: {query}";
+                    StatusText.Text = $"Running command: {command}";
                     InputQueryText.IsEnabled = false;
 
-                    int affectedRows = await RunQuery(query);
+                    int affectedRows = await RunAndFillUserGrid(command);
                     StatusText.Text = $"Query finished in {stopwatch.ElapsedMilliseconds}ms: Affected {affectedRows} rows";
                 }
                 catch (Exception ex)
@@ -108,19 +135,19 @@ namespace HealthCenter
                 {
                     InputQueryText.IsEnabled = true;
                     InputQueryText.Focus();
+
+                    await command.DisposeAsync();
                 }
             });
         }
 
-        public async Task<int> RunQuery(string query)
+        public async Task<int> RunAndFillUserGrid(NpgsqlCommand command)
         {
-            using NpgsqlCommand cmd = new(query, Connection);
-            using NpgsqlDataAdapter dataAdapter = new(cmd);
+            using NpgsqlDataAdapter dataAdapter = new(command);
 
-            DataSet dataSet = new();
-            int affectedRows = await Task.Run(() => dataAdapter.Fill(dataSet));
+            DataTable dataTable = new();
+            int affectedRows = await DbCalls.FillAsync(dataAdapter, dataTable, true, default);
 
-            DataTable dataTable = dataSet.Tables[0];
             UserGrid.ItemsSource = dataTable.DefaultView;
 
             return affectedRows;

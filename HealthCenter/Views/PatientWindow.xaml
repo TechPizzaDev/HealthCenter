@@ -5,9 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HealthCenter.Views"
         mc:Ignorable="d"
-        Title="HealthCenter - Patient" Height="500" Width="800">
+        Title="Health Center - Patient" Height="500" Width="800">
     <Grid>
         <Button Content="Create Appointment" Width="150" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Click="CreateAppointmentButton_Click"/>
 
+        <Button Content="Edit Personal Info" Width="150" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10, 50" Click="EditPersonalButton_Click"/>
+
+        <Button Content="Appointment List" Width="150" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="200, 10" Click="AppointmentListButton_Click"/>
+
+        <Button Content="Medical Record List" Width="150" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="200,50" Click="MedRecordListButton_Click"/>
+
+        <Button Content="Notification List" Width="150" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="200,90" Click="NotificationListButton_Click"/>
     </Grid>
 </Window>

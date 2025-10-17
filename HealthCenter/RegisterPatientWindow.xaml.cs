@@ -32,6 +32,17 @@ namespace HealthCenter
             UpdateButton();
         }
 
+        public void SetInputsEnabled(bool enabled)
+        {
+            PasswordTextbox.IsEnabled = enabled;
+            FirstNameTextbox.IsEnabled = enabled;
+            LastNameTextbox.IsEnabled = enabled;
+            GenderTextbox.IsEnabled = enabled;
+            BirthDatePicker.IsEnabled = enabled;
+            AddressTextbox.IsEnabled = enabled;
+            PhoneNumberTextbox.IsEnabled = enabled;
+        }
+
         private void UpdateButton()
         {
             bool enabled = true;
@@ -58,7 +69,7 @@ namespace HealthCenter
                 try
                 {
                     MedicalNumber medNum = new(int.Parse(MedicalNumTextbox.Text.Replace(" ", "")));
-                    byte[] password = DbHelper.MakePassword(PasswordTextbox.Password);
+                    byte[] password = DbCalls.MakePassword(PasswordTextbox.Password);
                     DateTime birthDate = BirthDatePicker.SelectedDate!.Value;
 
                     using NpgsqlCommand cmd = new();

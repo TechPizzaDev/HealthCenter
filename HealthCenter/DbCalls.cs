@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Authentication;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NodaTime;
@@ -13,6 +17,11 @@ namespace HealthCenter
 {
     public static class DbCalls
     {
+        public static byte[] MakePassword(string password)
+        {
+            return SHA512.HashData(Encoding.UTF8.GetBytes(password));
+        }
+
         /// <returns>The patient ID convertible to <see cref="MedicalNumber"/>.</returns>
         /// <exception cref="InvalidCredentialException"></exception>
         public static async Task<int> AuthPatient(
@@ -142,7 +151,7 @@ namespace HealthCenter
                 BitArray? mask = appointmentMasks[hours.Count];
                 if (mask != null)
                 {
-                    scheduleDays.Xor(mask);
+                    scheduleDays.And(mask.Not());
                 }
 
                 ScheduleHour item = new(hour, scheduleDays);
@@ -157,14 +166,13 @@ namespace HealthCenter
             CancellationToken cancellationToken = default)
         {
             NpgsqlBatch batch = new(connection);
+            string cmdText =
+                "SELECT day FROM appointments " +
+                "WHERE (doc_id = @doc_id AND hour = @hour)";
 
             foreach (OffsetTime hour in hours)
             {
-                NpgsqlBatchCommand cmd = new();
-                cmd.CommandText =
-                    "SELECT day FROM appointments " +
-                    "WHERE (doc_id = @doc_id AND hour = @hour)";
-
+                NpgsqlBatchCommand cmd = new(cmdText);
                 cmd.Parameters.Add(new NpgsqlParameter("doc_id", employeeId));
                 cmd.Parameters.Add(new NpgsqlParameter("hour", hour));
 
@@ -183,7 +191,7 @@ namespace HealthCenter
                     BitArray mask = masks[i] ?? (masks[i] = new BitArray(5));
                     mask.Or(day);
                 }
-                
+
                 if (!await reader.NextResultAsync(cancellationToken))
                 {
                     break;
@@ -192,5 +200,9 @@ namespace HealthCenter
 
             return masks;
         }
+
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "Fill")]
+        public extern static Task<int> FillAsync(
+            NpgsqlDataAdapter adapter, DataTable dataTable, bool async, CancellationToken cancellationToken);
     }
 }
